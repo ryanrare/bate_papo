@@ -10,10 +10,9 @@ async def handle_client(reader, writer):
         pass
     print(f"Mensagem recebida: {mensagem}")
 
-    # Aqui você pode adicionar a lógica para processar a mensagem,
-    # como por exemplo, salvar no banco de dados ou enviar para outros clientes.
+    # Aqui sera a logica para subir pro banco de dados, com possivel id do cliente e message, opu ate mandar para outros clientes
 
-    await writer.drain()  # Aguarda o envio completo dos dados
+    await writer.drain()
 
     writer.close()
 
