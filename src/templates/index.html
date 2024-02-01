@@ -16,37 +16,37 @@
         <button onclick="sendMessage()">Send</button>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
     <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+    
         function sendMessage() {
             var username = document.getElementById('username').value;
             var message = document.getElementById('message').value;
-
-            fetch('/send_message', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username: username, message: message }),
-            })
-            .then(response => response.json())
-            .then(data => console.log(data));
-
+    
+            socket.emit('send_message', { username: username, message: message });
+    
             document.getElementById('message').value = '';
         }
-
+    
         function getMessages() {
-            fetch('/get_messages')
-            .then(response => response.json())
-            .then(data => {
-                var messagesDiv = document.getElementById('messages');
-                messagesDiv.innerHTML = '';
-
-                data.messages.forEach(message => {
-                    messagesDiv.innerHTML += `<p>${message[1]}: ${message[2]}</p>`;
-                });
-            });
+            socket.emit('get_messages');
         }
-
+    
+        socket.on('messages_received', function(data) {
+            var messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '';
+    
+            data.messages.forEach(message => {
+                messagesDiv.innerHTML += `<p>${message[1]}: ${message[2]}</p>`;
+            });
+        });
+    
+        socket.on('message_sent', function(data) {
+            var messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += `<p>${data.username}: ${data.message}</p>`;
+        });
+    
         setInterval(getMessages, 1000);
     </script>
 </body>
