@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
+from utils import serialize_datetime
 import psycopg2
 
 app = Flask(__name__)
@@ -47,8 +48,9 @@ def handle_send_message(data):
 # Rota para obter mensagens
 @socketio.on('get_messages')
 def handle_get_messages():
-    db_cursor.execute("SELECT * FROM messages ORDER BY created_at DESC LIMIT 10")
+    db_cursor.execute("SELECT id, username, message FROM messages ORDER BY created_at DESC LIMIT 10")
     messages = db_cursor.fetchall()
+    
 
     emit('messages_received', {"messages": messages})
 
