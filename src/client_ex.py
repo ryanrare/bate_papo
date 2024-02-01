@@ -1,74 +1,53 @@
+# ///server
 # import socket
 
-# client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# import asyncio
 
-# client.connect(('localhost', 8888))
+# async def handle_client(reader, writer):
+#     # while True:
+#     data = await reader.read(1024)
+#     mensagem = data.decode('utf-8')
+#     if mensagem == 'tt':
+#         pass
+#     print(f"Mensagem recebida: {mensagem}")
 
-# terminado = False
-# print('Digite tt paara terminar esse o chat')
+#     # Aqui sera a logica para subir pro banco de dados, com possivel id do cliente e message, opu ate mandar para outros clientes
 
-# while not terminado:
-#     client.send(input('Mensagem: ').encode('utf-8'))
-#     msg = client.recv(1024).decode('utf-8')
-#     if msg == 'tt':
-#         terminado = True
-#     else:
-#         print(msg)
+#     await writer.drain()
 
-# client.close()
+#     writer.close()
+
+# async def main():
+#     server = await asyncio.start_server(handle_client, 'localhost', 8080, backlog=10000)
+
+#     async with server:
+#         await server.serve_forever()
+
+# if __name__ == '__main__':
+#     asyncio.run(main())
 
 
-# ///
-# from flask import Flask
-# import socket
+# /// app 
+# from flask import Flask, request
+# import asyncio
 
 # app = Flask(__name__)
 
-# client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# async def enviar_mensagem(message):
+#     reader, writer = await asyncio.open_connection('localhost', 8080)
+#     try:
+#         await writer.write(message.encode())
+#         await writer.drain()
 
-# client.connect(('localhost', 8888))
-
-# terminado = False
-# print('Dígite tt para terminar esse o chat')
-
-# while not terminado:
-#     client.send(input('Mensagem: ').encode('utf-8'))
-#     msg = client.recv(1024).decode('utf-8')
-#     if msg == 'tt':
-#         terminado = True
-#     else:
-#         print(msg)
-
-# client.close()
+#     except:
+#         print('ta no except')
+#         writer.close() 
 
 # @app.route('/mensagem', methods=['POST'])
-# def mensagem(request):
-#     mensagem = request.json['mensagem']
-#     client.send(mensagem.encode('utf-8'))
+# def mensagem():
+#     message = request.form['message']
+#     asyncio.run(enviar_mensagem(message))
 #     return 'Mensagem enviada!'
 
-# app.run(host='localhost', port=8888)
-
-
-
-# /////
-# import socket
-
-# server =  socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# server.bind(('localhost',  8888))
-
-# server.listen()
-# client, end = server.accept()
-
-# terminado = False
-# while not terminado:
-#     msg = client.recv(1024).decode('utf-8')
-#     if msg == 'tt':
-#         terminado = True
-#     else:
-#         print(msg)
-    
-#     client.send(input('Mensagem: {msg}').encode('utf-8'))
-
-# client.close()
-# server.close()
+# if __name__ == '__main__':
+#     app.run(host='localhost', port=8001)

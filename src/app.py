@@ -1,23 +1,42 @@
-from flask import Flask, request
-import asyncio
+from flask import Flask, render_template, request, jsonify
+import psycopg2
 
 app = Flask(__name__)
 
-async def enviar_mensagem(message):
-    reader, writer = await asyncio.open_connection('localhost', 8080)
-    try:
-        await writer.write(message.encode())
-        await writer.drain()
+# Configuração do banco de dados
+db_connection = psycopg2.connect(
+    database="bate_papo",
+    user="ryan",
+    password="/////",
+    host="localhost",
+    port="5432"
+)
+db_cursor = db_connection.cursor()
 
-    except:
-        print('fudeu tudooooo')
-        writer.close() 
+# Rota principal
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-@app.route('/mensagem', methods=['POST'])
-def mensagem():
-    message = request.form['message']
-    asyncio.run(enviar_mensagem(message))
-    return 'Mensagem enviada!'
+# Rota para enviar mensagens
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    data = request.get_json()
+    username = data['username']
+    message = data['message']
+
+    db_cursor.execute("INSERT INTO messages (username, message) VALUES (%s, %s)", (username, message))
+    db_connection.commit()
+
+    return jsonify({"status": "Message sent successfully"})
+
+# Rota para obter mensagens
+@app.route('/get_messages', methods=['GET'])
+def get_messages():
+    db_cursor.execute("SELECT * FROM messages ORDER BY created_at DESC LIMIT 10")
+    messages = db_cursor.fetchall()
+
+    return jsonify({"messages": messages})
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=8001)
+    app.run(debug=True)

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Chat App</title>
+</head>
+<body>
+    <h1>Chat App</h1>
+
+    <div id="chat">
+        <div id="messages"></div>
+        <input type="text" id="username" placeholder="Your username">
+        <textarea id="message" placeholder="Type your message"></textarea>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        function sendMessage() {
+            var username = document.getElementById('username').value;
+            var message = document.getElementById('message').value;
+
+            fetch('/send_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username: username, message: message }),
+            })
+            .then(response => response.json())
+            .then(data => console.log(data));
+
+            document.getElementById('message').value = '';
+        }
+
+        function getMessages() {
+            fetch('/get_messages')
+            .then(response => response.json())
+            .then(data => {
+                var messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML = '';
+
+                data.messages.forEach(message => {
+                    messagesDiv.innerHTML += `<p>${message[1]}: ${message[2]}</p>`;
+                });
+            });
+        }
+
+        setInterval(getMessages, 1000);
+    </script>
+</body>
+</html>
