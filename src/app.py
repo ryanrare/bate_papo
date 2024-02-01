@@ -2,6 +2,11 @@ from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
 from utils import serialize_datetime
 import psycopg2
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -10,7 +15,7 @@ socketio = SocketIO(app)
 db_connection = psycopg2.connect(
     database="bate_papo",
     user="ryan",
-    password="rv2605rv",
+    password=os.getenv("DB_PASSWORD"),
     host="localhost",
     port="5432"
 )
