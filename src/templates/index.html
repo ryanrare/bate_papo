@@ -1,53 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Chat App</title>
+    <title>Chat App</title>
+    <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
-    <h1>Chat App</h1>
-
-    <div id="chat">
-        <div id="messages"></div>
-        <input type="text" id="username" placeholder="Your username">
-        <textarea id="message" placeholder="Type your message"></textarea>
-        <button onclick="sendMessage()">Send</button>
-    </div>
-
+    <header>
+        <h1>Chat App</h1>
+    </header>
+    <main>
+        <section id="mensagens">
+            <h2>Mensagens</h2>
+            <ul id="lista-mensagens"></ul>
+        </section>
+        <section id="formulario">
+            <h2>Enviar Mensagem</h2>
+            <form onsubmit="sendMessage(event)">
+                <label for="username">Nome de usuário:</label>
+                <input type="text" id="username" placeholder="Digite seu nome">
+                <br>
+                <label for="message">Mensagem:</label>
+                <textarea id="message" placeholder="Digite sua mensagem"></textarea>
+                <br>
+                <button type="submit">Enviar</button>
+            </form>
+        </section>
+    </main>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
     <script>
-        var socket = io.connect('http://' + document.domain + ':' + location.port);
-    
-        function sendMessage() {
-            var username = document.getElementById('username').value;
-            var message = document.getElementById('message').value;
-    
-            socket.emit('send_message', { username: username, message: message });
-    
-            document.getElementById('message').value = '';
-        }
-    
-        function getMessages() {
-            socket.emit('get_messages');
-        }
-    
-        socket.on('messages_received', function(data) {
-            var messagesDiv = document.getElementById('messages');
-            messagesDiv.innerHTML = '';
-    
-            data.messages.forEach(message => {
-                messagesDiv.innerHTML += `<p>${message[1]}: ${message[2]}</p>`;
-            });
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    function sendMessage(event) {
+        event.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const message = document.getElementById('message').value;
+
+        socket.emit('send_message', { username, message });
+
+        document.getElementById('message').value = '';
+    }
+
+    function getMessages() {
+        socket.emit('get_messages');
+    }
+
+    socket.on('messages_received', function(data) {
+        const listaMensagens = document.getElementById('lista-mensagens');
+        listaMensagens.innerHTML = '';
+
+        data.messages.forEach(message => {
+            const mensagemElement = document.createElement('li');
+            mensagemElement.innerHTML = `<strong>${message[1]}:</strong> ${message[2]}`;
+            listaMensagens.appendChild(mensagemElement);
         });
-    
-        socket.on('message_sent', function(data) {
-            var messagesDiv = document.getElementById('messages');
-            messagesDiv.innerHTML += `<p>${data.username}: ${data.message}</p>`;
-        });
-    
-        setInterval(getMessages, 1000);
+    });
+
+    socket.on('message_sent', function(data) {
+        const listaMensagens = document.getElementById('lista-mensagens');
+        const mensagemElement = document.createElement('li');
+        mensagemElement.innerHTML = `<strong>${data.username}:</strong> ${data.message}`;
+        listaMensagens.appendChild(mensagemElement);
+    });
+
+    setInterval(getMessages, 1000);
+
     </script>
 </body>
 </html>
