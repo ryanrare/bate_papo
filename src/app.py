@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 from utils import serialize_datetime
 import psycopg2
@@ -11,7 +11,6 @@ load_dotenv()
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-# Configuração do banco de dados
 db_connection = psycopg2.connect(
     database="bate_papo",
     user="ryan",
@@ -37,19 +36,6 @@ def handle_send_message(data):
 
     emit('message_sent', {"username": username, "message": message}, broadcast=True)
 
-# # Rota para enviar mensagens
-# @app.route('/send_message', methods=['POST'])
-# def send_message():
-#     data = request.get_json()
-#     username = data['username']
-#     message = data['message']
-
-#     db_cursor.execute("INSERT INTO messages (username, message) VALUES (%s, %s)", (username, message))
-#     db_connection.commit()
-
-#     return jsonify({"status": "Message sent successfully"})
-
-
 # Rota para obter mensagens
 @socketio.on('get_messages')
 def handle_get_messages():
@@ -58,14 +44,6 @@ def handle_get_messages():
     
 
     emit('messages_received', {"messages": messages})
-
-# # Rota para obter mensagens
-# @app.route('/get_messages', methods=['GET'])
-# def get_messages():
-#     db_cursor.execute("SELECT * FROM messages ORDER BY created_at DESC LIMIT 10")
-#     messages = db_cursor.fetchall()
-
-#     return jsonify({"messages": messages})
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

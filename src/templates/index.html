@@ -64,9 +64,10 @@
         const mensagemElement = document.createElement('li');
         mensagemElement.innerHTML = `<strong>${data.username}:</strong> ${data.message}`;
         listaMensagens.appendChild(mensagemElement);
+        getMessages()
     });
 
-    setInterval(getMessages, 1000);
+    // setInterval(getMessages, 1000);
 
     </script>
 </body>
